@@ -61,10 +61,8 @@ pytest --cov
 
 Sample test output:
 
-```
-<img width="1530" height="420" alt="image" src="https://github.com/user-attachments/assets/6e009c11-940f-4faa-bd61-b09d94474b19" />
+<img width="1542" height="388" alt="image" src="https://github.com/user-attachments/assets/d806d6f7-10f9-4bd0-af92-eac54c5bdb2b" />
 
-```
 
 ## 📐 Smarter Scheduling
 
