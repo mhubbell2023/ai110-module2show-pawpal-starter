@@ -51,18 +51,29 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 
 ## 🧪 Testing PawPal+
 
-```bash
-# Run the full test suite:
-pytest
+Run the test suite with:
 
-# Run with coverage:
-pytest --cov
+```bash
+python -m pytest
 ```
 
-Sample test output:
+This project verifies the core scheduling behaviors, including:
 
-<img width="1542" height="388" alt="image" src="https://github.com/user-attachments/assets/d806d6f7-10f9-4bd0-af92-eac54c5bdb2b" />
+- chronological ordering with `Scheduler.sort_by_time()`
+- daily recurring tasks creating a next-day occurrence
+- overlap/conflict detection when two tasks share the same time window
+- scheduling only within the owner's available time
+- safe handling of pets with no scheduled tasks
 
+Successful pytest output:
+
+```text
+================================ 7 passed in 0.12s =================================
+```
+
+Confidence: ★★★★★ (5/5)
+
+The passing test results show the main scheduling behaviors are working as expected, which gives strong confidence in the current project logic and scope.
 
 ## 📐 Smarter Scheduling
 
