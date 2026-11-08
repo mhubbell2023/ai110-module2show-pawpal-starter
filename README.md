@@ -72,14 +72,22 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+PawPal+ uses several scheduling helpers to turn a list of pet-care tasks into a realistic daily plan.
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+- `Scheduler.sort_by_time()` arranges tasks in chronological order based on each task’s scheduled start time. This makes the day easier to read and helps the planner work through the plan in time order.
+- `Scheduler.filter_tasks()` narrows the task list by pet name and/or completion status. For example, you can view only the tasks for a specific pet, or hide tasks that are already complete.
+- `Task.mark_complete()` updates a task to complete and, when the task repeats, creates the next scheduled occurrence. `Task.create_next_occurrence()` builds the next daily or weekly task object using the same details and the next time value.
+- `Scheduler.detect_overlaps()` checks whether two task time ranges cross each other and returns a warning message when a conflict is found. This is useful for catching problems such as overlapping walks, feedings, or grooming sessions.
+- `Scheduler.generate_daily_schedule()` combines filtering, sorting, and the owner’s available_time limit so the app picks the most appropriate tasks for the day.
+
+These methods support the main scheduling ideas behind PawPal+:
+
+- chronological sorting with `sort_by_time()`
+- filtering by pet and completion status with `filter_tasks()`
+- recurring daily and weekly tasks using `mark_complete()` and `create_next_occurrence()`
+- conflict detection with `detect_overlaps()`
+
+This helps the system stay organized while still being simple enough for a beginner Python project.
 
 ## 📸 Demo Walkthrough
 
