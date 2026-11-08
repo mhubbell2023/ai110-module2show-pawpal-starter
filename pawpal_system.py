@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Owner:
-    """Represents a pet owner and their available time and pet list."""
+    """Stores owner details and their pets."""
 
     owner_id: str
     name: str
@@ -14,21 +14,32 @@ class Owner:
     pets: list["Pet"] = field(default_factory=list)
 
     def add_pet(self, pet: "Pet") -> None:
-        """Add a pet to the owner's collection."""
-        pass
+        """Adds a pet to the owner."""
+        self.pets.append(pet)
 
     def remove_pet(self, pet: "Pet") -> None:
-        """Remove a pet from the owner's collection."""
-        pass
+        """Removes a pet from the owner."""
+        if pet in self.pets:
+            self.pets.remove(pet)
 
-    def get_pet(self, name: str) -> "Pet":
-        """Get a pet by name from the owner's collection."""
-        pass
+    def get_pet(self, name: str) -> "Pet | None":
+        """Finds a pet by name."""
+        for pet in self.pets:
+            if pet.name.lower() == name.lower():
+                return pet
+        return None
+
+    def get_all_tasks(self) -> list["Task"]:
+        """Collects all tasks across the owner's pets."""
+        tasks: list[Task] = []
+        for pet in self.pets:
+            tasks.extend(pet.get_tasks())
+        return tasks
 
 
 @dataclass
 class Pet:
-    """Represents a pet and its scheduled care tasks."""
+    """Stores pet details and care tasks."""
 
     pet_id: str
     name: str
@@ -37,52 +48,80 @@ class Pet:
     care_tasks: list["Task"] = field(default_factory=list)
 
     def add_task(self, task: "Task") -> None:
-        """Add a care task to the pet."""
-        pass
+        """Adds a task to the pet."""
+        self.care_tasks.append(task)
 
     def remove_task(self, task: "Task") -> None:
-        """Remove a care task from the pet."""
-        pass
+        """Removes a task from the pet."""
+        if task in self.care_tasks:
+            self.care_tasks.remove(task)
 
     def get_tasks(self) -> list["Task"]:
-        """Return the list of tasks for this pet."""
-        pass
+        """Returns the pet's tasks."""
+        return self.care_tasks
 
 
 @dataclass
 class Task:
-    """Represents a single pet care task."""
+    """Stores a pet care task."""
 
     task_id: str
     name: str
     duration: int
     priority: str
     completed: bool = False
+    scheduled_time: str = "unscheduled"
+    frequency: str = "daily"
 
     def mark_complete(self) -> None:
-        """Mark the task as completed."""
-        pass
+        """Marks the task as complete."""
+        self.completed = True
 
     def reset_status(self) -> None:
-        """Reset the task back to an incomplete status."""
-        pass
+        """Resets the task to incomplete."""
+        self.completed = False
 
 
 class Scheduler:
-    """Organizes pet care tasks into a daily schedule."""
+    """Builds a simple daily schedule."""
 
     def generate_daily_schedule(self, owner: Owner) -> list[Task]:
-        """Create a daily schedule for the owner based on their pets and tasks."""
-        pass
+        """Creates a daily schedule for an owner."""
+        tasks = owner.get_all_tasks()
+        incomplete_tasks = [task for task in tasks if not task.completed]
+        priority_sorted = self.sort_by_priority(incomplete_tasks)
+        return self.fit_available_time(priority_sorted, owner.available_time)
 
     def sort_by_priority(self, tasks: list[Task]) -> list[Task]:
-        """Sort tasks by priority so the most important tasks come first."""
-        pass
+        """Sorts tasks by priority and scheduled time."""
+        priority_order = {"high": 0, "medium": 1, "low": 2}
+        time_order = {"morning": 0, "afternoon": 1, "evening": 2, "unscheduled": 3}
+
+        return sorted(
+            tasks,
+            key=lambda task: (
+                priority_order.get(task.priority.lower(), 99),
+                time_order.get(task.scheduled_time.lower(), 99),
+                task.duration,
+            ),
+        )
 
     def fit_available_time(self, tasks: list[Task], available_time: int) -> list[Task]:
-        """Select tasks that fit within the owner's available time."""
-        pass
+        """Keeps tasks that fit within the owner's time."""
+        selected: list[Task] = []
+        total_duration = 0
+
+        for task in tasks:
+            if total_duration + task.duration <= available_time:
+                selected.append(task)
+                total_duration += task.duration
+
+        return selected
 
     def explain_schedule(self, schedule: list[Task]) -> str:
-        """Return an explanation of the scheduling decisions."""
-        pass
+        """Explains the selected schedule."""
+        if not schedule:
+            return "No tasks fit within the available time for this day."
+
+        task_names = ", ".join(task.name for task in schedule)
+        return f"The schedule includes: {task_names}. Tasks are ordered by priority and fit within the available time."
