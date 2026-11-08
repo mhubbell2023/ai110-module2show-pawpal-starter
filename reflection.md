@@ -14,6 +14,8 @@ My initial UML design includes four classes: Owner, Pet, Task, and Scheduler. Ow
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+After reviewing my UML diagram and Python class skeletons with AI, I confirmed that the four classes matched and had clear responsibilities. One change I made was allowing an Owner to have zero or more Pets instead of requiring at least one. This allows users to create a profile before adding a pet. AI also suggested that the get_pet() method could eventually return None when a pet is not found, which I can address during implementation. Overall, I kept the design simple and modular so the scheduling logic can be added later.
+
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
