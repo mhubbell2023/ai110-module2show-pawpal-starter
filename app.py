@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from pawpal_system import Owner, Pet, Task, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
@@ -14,6 +15,7 @@ if "owner" not in st.session_state:
     )
 
 owner = st.session_state.owner
+scheduler = Scheduler()
 
 st.markdown(
     """
@@ -72,6 +74,7 @@ if owner.pets:
         duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
         priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
         scheduled_time = st.selectbox("Scheduled time", ["morning", "afternoon", "evening"])
+        frequency = st.selectbox("Frequency", ["one-time", "daily", "weekly"], index=1)
 
         if st.form_submit_button("Add task"):
             selected_pet = owner.get_pet(selected_pet_name)
@@ -82,7 +85,7 @@ if owner.pets:
                     duration=int(duration),
                     priority=priority,
                     scheduled_time=scheduled_time,
-                    frequency="daily",
+                    frequency=frequency,
                 )
                 selected_pet.add_task(task)
                 st.session_state.owner = owner
@@ -92,25 +95,62 @@ else:
 
 st.divider()
 
-st.subheader("Pets and Tasks")
+st.subheader("Tasks")
 if owner.pets:
-    for pet in owner.pets:
-        st.markdown(f"### {pet.name} ({pet.breed})")
-        if pet.get_tasks():
-            for task in pet.get_tasks():
-                col1, col2, col3 = st.columns([2, 1, 1])
-                with col1:
-                    status = "✅ Complete" if task.completed else "⏳ Incomplete"
-                    st.write(f"{task.name} - {status}")
-                with col2:
-                    st.write(f"{task.scheduled_time} | {task.priority}")
-                with col3:
-                    if st.button(f"Mark complete", key=f"complete_{pet.pet_id}_{task.task_id}"):
-                        task.mark_complete()
-                        st.session_state.owner = owner
-                        st.rerun()
+    pet_filter = st.selectbox("Filter by pet", ["All pets"] + [pet.name for pet in owner.pets])
+    status_filter = st.selectbox("Filter by status", ["All", "Completed", "Incomplete"])
+
+    pet_name_filter = None if pet_filter == "All pets" else pet_filter
+    completed_filter = None if status_filter == "All" else status_filter == "Completed"
+
+    filtered_tasks = scheduler.filter_tasks(
+        owner.get_all_tasks(),
+        pet_name=pet_name_filter,
+        completed=completed_filter,
+    )
+    ordered_tasks = scheduler.sort_by_time(filtered_tasks)
+
+    if ordered_tasks:
+        rows = []
+        for task in ordered_tasks:
+            recurrence = "One-time"
+            if task.frequency.lower() in {"daily", "weekly"}:
+                next_occurrence = task.next_occurrence.strftime("%Y-%m-%d %H:%M") if task.next_occurrence else task.scheduled_time
+                recurrence = f"{task.frequency.title()} • next: {next_occurrence}"
+
+            rows.append(
+                {
+                    "Pet": task.pet_name,
+                    "Task": task.name,
+                    "Time": task.scheduled_time,
+                    "Duration": f"{task.duration} min",
+                    "Priority": task.priority.title(),
+                    "Status": "Complete" if task.completed else "Incomplete",
+                    "Recurring": recurrence,
+                }
+            )
+
+        st.table(pd.DataFrame(rows))
+
+        overlap_warnings = scheduler.detect_overlaps(ordered_tasks)
+        if overlap_warnings:
+            st.warning("\n".join(overlap_warnings))
         else:
-            st.caption("No tasks yet.")
+            st.success("No scheduling conflicts for the visible tasks.")
+
+        task_option_labels = [f"{task.pet_name}: {task.name}" for task in ordered_tasks]
+        selected_task_label = st.selectbox("Mark a task complete", task_option_labels)
+        selected_task = next(
+            task for task in ordered_tasks if f"{task.pet_name}: {task.name}" == selected_task_label
+        )
+
+        if st.button("Mark complete", key=f"complete_task_{selected_task.task_id}"):
+            selected_task.mark_complete()
+            st.session_state.owner = owner
+            st.success(f"Marked '{selected_task.name}' as complete.")
+            st.rerun()
+    else:
+        st.info("No tasks match the selected filters.")
 else:
     st.info("No pets yet. Add one above.")
 
@@ -118,7 +158,6 @@ st.divider()
 
 st.subheader("Build Schedule")
 if st.button("Generate schedule"):
-    scheduler = Scheduler()
     schedule = scheduler.generate_daily_schedule(owner)
 
     st.markdown("### Today's Schedule")
