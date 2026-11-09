@@ -98,10 +98,20 @@ This helps the system stay organized while still being simple enough for a begin
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. **Launch PawPal+:** Run `python -m streamlit run app.py` in the terminal to open the PawPal+ application in your browser.
+
+2. **Enter Owner Information:** Enter the pet owner's name and available daily time in minutes. Click "Update owner" to save the information.
+
+3. **Add a Pet:** Enter a pet's name, age, and breed, then click "Add pet." The pet will appear in the application and can have care tasks assigned to it.
+
+4. **Create Care Tasks:** Select a pet and enter a task such as feeding, walking, or grooming. Set the task's duration, priority, and scheduled time before clicking "Add task."
+
+5. **View and Manage Tasks:** View the tasks assigned to each pet, sort them chronologically, and filter by pet or completion status. Mark tasks complete as they are finished.
+
+6. **Generate a Daily Schedule:** Click "Generate schedule" to create a daily plan based on task priorities, durations, and the owner's available time.
+
+7. **Check Scheduling Conflicts:** The application identifies overlapping tasks and displays warnings to help the owner recognize scheduling conflicts.
+
+8. **Manage Recurring Tasks:** When a daily or weekly recurring task is completed, PawPal+ automatically creates the next occurrence so the owner can continue following their pet care routine.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
